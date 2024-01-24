@@ -16,18 +16,24 @@ class GoogleDrive:
             self.CREDS          = service_account.Credentials.from_service_account_file(self.KEY, scopes=self.SCOPE)
             self.SERVICE        = build("drive", "v3", credentials=self.CREDS)
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
-    def getFileJson(self, id):
+    def getFile(self, id):
         try:
             request                 = self.SERVICE.files().get_media(fileId = id)
             file                    = io.BytesIO()
             downloader              = MediaIoBaseDownload(file, request)
             done                    = False
             while done is False:
-                status, done = downloader.next_chunk()
-            return json.loads(file.getvalue().decode("utf8").replace("'", '"'))
+                status, done        = downloader.next_chunk()
+            return file.getvalue().decode("utf8").replace("'", '"')
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)

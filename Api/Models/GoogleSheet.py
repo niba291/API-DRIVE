@@ -4,7 +4,6 @@ from google.oauth2 import service_account
 class GoogleSheet:
 
     SPREADSHEET_ID  = None
-    SHEET_NAME      = None
     RANGE           = None
     CREDS           = None
     SERVICE         = None
@@ -12,16 +11,18 @@ class GoogleSheet:
     KEY             = "E:/Proyectos/API-DRIVE/credentials.json"
     SCOPE           = ["https://www.googleapis.com/auth/spreadsheets"]
 
-    def __init__(self, spreadsheet_id, sheet_name, range):
+    def __init__(self, spreadsheetId, range):
         try:
-            self.SPREADSHEET_ID = spreadsheet_id
-            self.SHEET_NAME     = sheet_name
+            self.SPREADSHEET_ID = spreadsheetId
             self.RANGE          = range
             self.CREDS          = service_account.Credentials.from_service_account_file(self.KEY, scopes=self.SCOPE)
             self.SERVICE        = build("sheets", "v4", credentials=self.CREDS)
             self.SHEET          = self.SERVICE.spreadsheets()
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
     def get(self, filter = None):
@@ -36,7 +37,7 @@ class GoogleSheet:
 
             result              = self.SHEET.values().get(
                 spreadsheetId   = self.SPREADSHEET_ID, 
-                range           = f"{self.SHEET_NAME}!{self.RANGE}"
+                range           = self.RANGE
             ).execute()
 
             auxReturn           = []
@@ -50,37 +51,47 @@ class GoogleSheet:
 
             return auxReturn
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
-    def append(self, data):
+    def add(self, data):
         try:
             result               = self.SHEET.values().append(
                 spreadsheetId    = self.SPREADSHEET_ID, 
-                range            = f"{self.SHEET_NAME}!{self.RANGE}", 
+                range            = self.RANGE, 
                 valueInputOption = "USER_ENTERED", 
                 body             = {"values": data}
             ).execute()
             return result
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
     def update(self, data):
         try:
             result               = self.SHEET.values().update(
                 spreadsheetId    = self.SPREADSHEET_ID, 
-                range            = f"{self.SHEET_NAME}!{self.RANGE}", 
+                range            = self.RANGE, 
                 valueInputOption = "USER_ENTERED", 
                 body             = {"values": data}
             ).execute()
             return result
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
-    def delete(self):
+    def delete(self, idSheet):
         try:
+            auxRange                = self.RANGE.split(":")
             result                  = self.SHEET.batchUpdate(
                 spreadsheetId       = self.SPREADSHEET_ID, 
                 body                = {
@@ -88,10 +99,10 @@ class GoogleSheet:
                         {
                             "deleteDimension": {
                                 "range": {
-                                    "sheetId"    : 1234651651,
+                                    "sheetId"    : idSheet,
                                     "dimension"  : "ROWS",
-                                    "startIndex" : 1,
-                                    "endIndex"   : 2
+                                    "startIndex" : auxRange[0],
+                                    "endIndex"   : auxRange[1]
                                 }
                             }
                         }
@@ -100,7 +111,10 @@ class GoogleSheet:
             ).execute()
             return result
         except Exception as e:
-            print(e)
+            print({
+                "error"     : True,
+                "response"  : e
+            })
             exit(1)
 
     def info(self):
