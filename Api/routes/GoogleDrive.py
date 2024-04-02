@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # IMPORT ========================================================================================================================
+from utils.env                              import ENV
+from json                                   import loads
 from flask                                  import Blueprint, jsonify, request
-from api.models.GoogleDrive                 import GoogleDrive
+from GoogleNb.GoogleDrive                   import GoogleDrive
 # BLUEPRINT =====================================================================================================================
 google_drive                                = Blueprint("google_drive", __name__)
 # ROUTE =========================================================================================================================
@@ -19,10 +21,10 @@ google_drive                                = Blueprint("google_drive", __name__
 #     if token["error"]:
 #         return jsonify(token), 401
 
-@google_drive.route("/googlesheet/get", methods = ["POST"])
-def google_drive_get_file() -> dict:
+@google_drive.route("/googledrive/getfile/<string:id>", methods = ["GET"])
+def google_drive_get_file(id = "") -> dict:
     """
-        Return data google sheet
+        Return data google drive
         Return      : dict
-    """
-    return jsonify(GoogleDrive().getFile(request.json["idFile"]))
+    """    
+    return jsonify(loads(GoogleDrive(ENV["PATH_CREDENTIALS"]).getFile(id).decode("utf8")))
