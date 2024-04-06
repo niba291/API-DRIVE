@@ -29,7 +29,7 @@ def google_sheet_get(rangeSheet = "", id = "") -> dict:
     """
     response            = GoogleSheet(ENV["PATH_CREDENTIALS"]).get(
         spreadsheetId   = id, 
-        range           = rangeSheet
+        ranges          = rangeSheet.split(";")
     )
     return jsonify(response), HTTP_200_OK if not ("error" in response) else HTTP_400_BAD_REQUEST
     
@@ -71,3 +71,14 @@ def google_sheet_delete(range = "", id = "", idSheet = "") -> dict:
         idSheet         = idSheet
     )
     return jsonify(response), HTTP_200_OK if not ("error" in response) else HTTP_400_BAD_REQUEST
+
+# @google_sheet.route("/googlesheet/formating/<string:id>", methods = ["GET"])
+# def google_sheet_formating(id = "") -> dict:
+#     """
+#         Delete element in sheet
+#         Return      : dict
+#     """
+#     response            = GoogleSheet(ENV["PATH_CREDENTIALS"]).conditional_formatting(
+#         spreadsheetId   = id, 
+#     )
+#     return jsonify(response), HTTP_200_OK if not ("error" in response) else HTTP_400_BAD_REQUEST
